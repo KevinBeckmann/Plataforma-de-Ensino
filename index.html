@@ -51,6 +51,10 @@
         .chat-input-wrapper { padding: 15px; border-top: 1px solid var(--secondary); background: var(--primary); }
         .chat-input-wrapper input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--secondary); background: #0f172a; color: white; outline: none; box-sizing: border-box; }
         .chat-input-wrapper input:focus { border-color: var(--accent); }
+
+        /* Ícone discreto para acesso ao admin */
+        .admin-access { position: fixed; bottom: 10px; right: 10px; font-size: 1.2rem; cursor: pointer; opacity: 0.5; transition: 0.3s; color: #94a3b8; }
+        .admin-access:hover { opacity: 1; color: var(--accent); }
     </style>
 </head>
 <body>
@@ -139,6 +143,9 @@
     </section>
 </div>
 
+<!-- Ícone discreto para acesso ao painel admin -->
+<div class="admin-access" onclick="accessAdmin()">⚙️</div>
+
 <script>
     let currentChat = 'turma';
     let chatMessages = {
@@ -153,13 +160,41 @@
 
     let lessonsData = {};
 
-    // Carregar dados do data.json
+    // Carregar dados do data.json com fallback
     fetch('data.json')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Arquivo não encontrado');
+            return response.json();
+        })
         .then(data => {
             lessonsData = data.lessons || {};
+            console.log('Dados carregados:', lessonsData);
         })
-        .catch(error => console.error('Erro ao carregar dados:', error));
+        .catch(error => {
+            console.error('Erro ao carregar dados:', error);
+            // Fallback: dados padrão
+            lessonsData = {
+                "1.1": {
+                    "title": "Conceitos Básicos de Logística",
+                    "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                    "materials": [{"name": "📄 Introdução_Logistica.pdf", "url": "https://example.com/introducao.pdf"}]
+                },
+                "1.2": {
+                    "title": "O Mercado de CGL no Brasil",
+                    "videoUrl": "",
+                    "materials": [{"name": "📄 Mercado_CGL.pdf", "url": "https://example.com/mercado.pdf"}]
+                },
+                "2.1": {
+                    "title": "Ferramentas de Gestão e Análise",
+                    "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                    "materials": [
+                        {"name": "📄 Guia_Estrategico_CGL.pdf", "url": "https://example.com/guia.pdf"},
+                        {"name": "📝 Planilha_Exercicios_V1.xlsx", "url": "https://example.com/planilha.xlsx"}
+                    ]
+                }
+            };
+            alert('Usando dados padrão (data.json não encontrado).');
+        });
 
     function updateProgress() {
         const completedLessons = document.querySelectorAll('.lesson:not(.locked)').length;
@@ -238,6 +273,15 @@
             
             updateChatDisplay();
             e.target.value = "";
+        }
+    }
+
+    function accessAdmin() {
+        const password = prompt("Digite a senha para acessar o painel do professor:");
+        if (password === "bemohr6202") {
+            window.location.href = "admin-panel.html";
+        } else {
+            alert("Senha incorreta!");
         }
     }
 </script>
