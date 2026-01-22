@@ -15,45 +15,41 @@
         
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--admin-bg); color: white; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar Admin */
         .sidebar { width: 260px; background: #111827; border-right: 1px solid #374151; display: flex; flex-direction: column; }
         .sidebar-header { padding: 20px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #374151; color: var(--accent); }
         .nav-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #1f2937; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
         .nav-item:hover { background: #1e293b; }
         .nav-item.active { background: var(--accent); border-left: 4px solid #fff; }
 
-        /* Main Area */
         .main { flex: 1; display: grid; grid-template-columns: 1fr 320px; overflow: hidden; }
-        .content { padding: 30px; overflow-y: auto; display: none; } /* Escondido por padrão */
-        .content.active { display: block; } /* Mostra apenas o ativo */
+        .content { padding: 30px; overflow-y: auto; display: none; }
+        .content.active { display: block; }
         
         .card { background: var(--card-bg); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #374151; }
         
-        /* Stats */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: var(--success); padding: 15px; border-radius: 8px; text-align: center; }
 
         .btn-add { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-add:hover { opacity: 0.9; }
 
-        /* Listas */
         .item-list { list-style: none; padding: 0; }
         .item-list li { display: flex; justify-content: space-between; padding: 12px; background: #374151; margin-bottom: 8px; border-radius: 4px; align-items: center; }
         .actions span { cursor: pointer; margin-left: 10px; opacity: 0.7; transition: 0.2s; }
         .actions span:hover { opacity: 1; }
 
-        /* Financeiro Table */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { text-align: left; padding: 12px; border-bottom: 1px solid #374151; }
         th { color: #94a3b8; font-size: 0.8em; text-transform: uppercase; }
 
-        /* Chat Lateral */
         .chat-admin { background: #1f2937; border-left: 1px solid #374151; display: flex; flex-direction: column; }
         .chat-header { padding: 15px; background: #111827; font-weight: bold; border-bottom: 1px solid #374151; }
         .messages { flex: 1; padding: 15px; overflow-y: auto; }
         .msg-bubble { background: #374151; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9em; }
         .chat-input-area { padding: 15px; border-top: 1px solid #374151; }
         .chat-input-area input { width: 90%; padding: 10px; border-radius: 5px; border: none; background: #111827; color: white; }
+        
+        .json-output { background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -87,18 +83,16 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3>Estrutura do Curso</h3>
-                <button class="btn-add" onclick="alert('Abrir modal de nova aula')">+ Adicionar Conteúdo</button>
+                <button class="btn-add" onclick="addLesson()">+ Adicionar Conteúdo</button>
             </div>
-            <ul class="item-list">
-                <li><span>🎥 Aula 1.1: Fundamentos</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
-                <li><span>🎥 Aula 1.2: Cadeia de Suprimentos</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
-                <li><span>📄 Apostila_Modulo_1.pdf</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
-                <li><span>🎥 Aula 2.1: Gestão de KPIs</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
+            <ul class="item-list" id="lesson-list">
+                <!-- Aulas carregadas dinamicamente -->
             </ul>
         </div>
         <div class="card">
-            <h3>Upload Rápido</h3>
-            <input type="file" style="background: #111827; padding: 10px; width: 100%; border-radius: 5px; border: 1px dashed #4b5563;">
+            <h3>JSON Atualizado (Copie e cole no data.json do repositório)</h3>
+            <div class="json-output" id="json-output"></div>
+            <button class="btn-add" onclick="generateJSON()">Gerar JSON</button>
         </div>
     </div>
 
@@ -184,28 +178,96 @@
 </div>
 
 <script>
-    // Função para alternar entre as abas/páginas
+    let lessonsData = {};
+
+    // Carregar dados do data.json
+    fetch('data.json')
+        .then(response => response.json())
+        .then(data => {
+            lessonsData = data.lessons || {};
+            loadLessons();
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+
     function showPage(pageId) {
-        // Esconde todas as páginas
         const pages = document.querySelectorAll('.content');
         pages.forEach(page => page.classList.remove('active'));
-
-        // Mostra a página clicada
         document.getElementById(pageId).classList.add('active');
-
-        // Atualiza a classe active no menu lateral
+        
         const navItems = document.querySelectorAll('.nav-item');
         navItems.forEach(item => item.classList.remove('active'));
         event.currentTarget.classList.add('active');
     }
 
-    // Função simples de chat
+    function addLesson() {
+        const title = prompt("Título da aula:");
+        const lessonId = prompt("ID da aula (ex.: 2.1):");
+        if (title && lessonId) {
+            lessonsData[lessonId] = {
+                title: title,
+                videoUrl: "",
+                materials: []
+            };
+            loadLessons();
+            generateJSON();
+        }
+    }
+
+    function addMaterial(lessonId) {
+        const name = prompt("Nome do material:");
+        const url = prompt("URL do material:");
+        if (name && url) {
+            lessonsData[lessonId].materials.push({ name: name, url: url });
+            loadLessons();
+            generateJSON();
+        }
+    }
+
+    function setVideo(lessonId) {
+        const url = prompt("URL do vídeo:");
+        if (url) {
+            lessonsData[lessonId].videoUrl = url;
+            loadLessons();
+            generateJSON();
+        }
+    }
+
+    function deleteLesson(lessonId) {
+        if (confirm("Deletar aula?")) {
+            delete lessonsData[lessonId];
+            loadLessons();
+            generateJSON();
+        }
+    }
+
+    function loadLessons() {
+        const itemList = document.getElementById('lesson-list');
+        itemList.innerHTML = '';
+        for (const id in lessonsData) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <span>${lessonsData[id].title} (${id})</span>
+                <div class="actions">
+                    <span onclick="setVideo('${id}')">🎥 Set Vídeo</span>
+                    <span onclick="addMaterial('${id}')">📄 Add Material</span>
+                    <span style="color:var(--danger)" onclick="deleteLesson('${id}')">🗑️</span>
+                </div>
+            `;
+            itemList.appendChild(li);
+        }
+    }
+
+    function generateJSON() {
+        const json = JSON.stringify({ lessons: lessonsData }, null, 2);
+        document.getElementById('json-output').innerText = json;
+    }
+
     function sendMessage(e) {
         if (e.key === 'Enter' && e.target.value !== "") {
             const chatBox = document.getElementById('chatMessages');
             const newMsg = document.createElement('div');
             newMsg.className = 'msg-bubble';
-            newMsg.style.background = '#1e3a8a'; // Cor diferente para o professor
+            newMsg.style.background = '#1e3a8a';
             newMsg.innerHTML = `<small style="color: #60a5fa">Você (Professor):</small><br>${e.target.value}`;
             chatBox.appendChild(newMsg);
             e.target.value = "";
