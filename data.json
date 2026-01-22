@@ -1,0 +1,38 @@
+{
+  "lessons": {
+    "1.1": {
+      "title": "Conceitos Básicos de Logística",
+      "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "materials": [
+        {
+          "name": "📄 Introdução_Logistica.pdf",
+          "url": "https://example.com/introducao.pdf"
+        }
+      ]
+    },
+    "1.2": {
+      "title": "O Mercado de CGL no Brasil",
+      "videoUrl": "",
+      "materials": [
+        {
+          "name": "📄 Mercado_CGL.pdf",
+          "url": "https://example.com/mercado.pdf"
+        }
+      ]
+    },
+    "2.1": {
+      "title": "Ferramentas de Gestão e Análise",
+      "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "materials": [
+        {
+          "name": "📄 Guia_Estrategico_CGL.pdf",
+          "url": "https://example.com/guia.pdf"
+        },
+        {
+          "name": "📝 Planilha_Exercicios_V1.xlsx",
+          "url": "https://example.com/planilha.xlsx"
+        }
+      ]
+    }
+  }
+}
