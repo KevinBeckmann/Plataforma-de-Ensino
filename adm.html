@@ -49,7 +49,7 @@
         .chat-input-area { padding: 15px; border-top: 1px solid #374151; }
         .chat-input-area input { width: 90%; padding: 10px; border-radius: 5px; border: none; background: #111827; color: white; }
         
-        .json-output { background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; margin-top: 20px; }
+        .json-output { background: #0f172a; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; margin-top: 20px; max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -83,7 +83,7 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3>Estrutura do Curso</h3>
-                <button class="btn-add" onclick="addLesson()">+ Adicionar Conteúdo</button>
+                <button class="btn-add" onclick="addLesson()">+ Adicionar Aula</button>
             </div>
             <ul class="item-list" id="lesson-list">
                 <!-- Aulas carregadas dinamicamente -->
@@ -180,14 +180,42 @@
 <script>
     let lessonsData = {};
 
-    // Carregar dados do data.json
+    // Carregar dados do data.json com fallback
     fetch('data.json')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Arquivo não encontrado');
+            return response.json();
+        })
         .then(data => {
             lessonsData = data.lessons || {};
             loadLessons();
         })
-        .catch(error => console.error('Erro ao carregar dados:', error));
+        .catch(error => {
+            console.error('Erro ao carregar dados:', error);
+            // Fallback: dados padrão
+            lessonsData = {
+                "1.1": {
+                    "title": "Conceitos Básicos de Logística",
+                    "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                    "materials": [{"name": "📄 Introdução_Logistica.pdf", "url": "https://example.com/introducao.pdf"}]
+                },
+                "1.2": {
+                    "title": "O Mercado de CGL no Brasil",
+                    "videoUrl": "",
+                    "materials": [{"name": "📄 Mercado_CGL.pdf", "url": "https://example.com/mercado.pdf"}]
+                },
+                "2.1": {
+                    "title": "Ferramentas de Gestão e Análise",
+                    "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                    "materials": [
+                        {"name": "📄 Guia_Estrategico_CGL.pdf", "url": "https://example.com/guia.pdf"},
+                        {"name": "📝 Planilha_Exercicios_V1.xlsx", "url": "https://example.com/planilha.xlsx"}
+                    ]
+                }
+            };
+            loadLessons();
+            alert('Usando dados padrão (data.json não encontrado).');
+        });
 
     function showPage(pageId) {
         const pages = document.querySelectorAll('.content');
