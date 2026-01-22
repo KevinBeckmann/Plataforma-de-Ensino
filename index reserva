@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGL - Portal do Aluno</title>
+    <style>
+        :root {
+            --primary: #1e293b; --secondary: #334155; --accent: #3b82f6; --text: #f8fafc;
+        }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #0f172a; color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        header { background: var(--primary); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--secondary); z-index: 10; }
+        
+        .container { display: grid; grid-template-columns: 280px 1fr 300px; flex: 1; overflow: hidden; }
+        
+        .sidebar { background: var(--primary); padding: 20px; border-right: 1px solid var(--secondary); overflow-y: auto; }
+        .progress-container { margin-bottom: 25px; background: #0f172a; padding: 15px; border-radius: 8px; }
+        .progress-bar { background: #475569; border-radius: 10px; height: 8px; margin-top: 10px; }
+        .progress-fill { background: var(--accent); width: 65%; height: 100%; border-radius: 10px; transition: 0.5s; }
+        
+        .module { margin-bottom: 20px; }
+        .module-title { font-weight: bold; margin-bottom: 10px; color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+        .lesson { padding: 10px; cursor: pointer; border-radius: 6px; transition: 0.2s; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .lesson:hover { background: var(--secondary); }
+        .lesson.active { background: var(--accent); color: white; }
+        .lesson.locked { opacity: 0.5; cursor: not-allowed; }
+
+        .main-content { padding: 30px; overflow-y: auto; background: #1e293b; display: flex; flex-direction: column; gap: 20px; }
+        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        .video-player button { background: var(--accent); border: none; color: white; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .video-player button:hover { transform: scale(1.1); }
+        .video-player iframe { width: 100%; height: 100%; border-radius: 12px; display: none; }
+        
+        .materials { background: var(--secondary); padding: 25px; border-radius: 12px; }
+        .material-item { display: flex; align-items: center; justify-content: space-between; background: #1e293b; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #475569; }
+        .btn-download { background: #475569; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .btn-download:hover { background: var(--accent); }
+
+        .chat-area { background: var(--primary); border-left: 1px solid var(--secondary); display: flex; flex-direction: column; }
+        .chat-tabs { display: flex; background: #0f172a; border-bottom: 1px solid var(--secondary); }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.3s; color: #94a3b8; }
+        .tab.active { border-bottom: 2px solid var(--accent); background: var(--secondary); color: white; }
+        
+        .messages-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { background: var(--secondary); padding: 10px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; border-bottom-left-radius: 2px; align-self: flex-start; max-width: 90%; }
+        .msg.me { background: var(--accent); border-bottom-left-radius: 8px; border-bottom-right-radius: 2px; align-self: flex-end; }
+        .msg small { display: block; margin-bottom: 4px; color: #94a3b8; font-weight: bold; }
+        .msg.me small { color: #dbeafe; }
+
+        .chat-input-wrapper { padding: 15px; border-top: 1px solid var(--secondary); background: var(--primary); }
+        .chat-input-wrapper input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--secondary); background: #0f172a; color: white; outline: none; box-sizing: border-box; }
+        .chat-input-wrapper input:focus { border-color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 24px; font-weight: bold; color: var(--accent);">CGL <span style="color: white; font-weight: 300; font-size: 16px;">| Learning</span></div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="text-align: right;">
+            <div style="font-size: 0.9rem; font-weight: bold;">João Silva</div>
+            <div style="font-size: 0.7rem; color: #22c55e;">● Online</div>
+        </div>
+        <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">JS</div>
+    </div>
+</header>
+
+<div class="container">
+    <aside class="sidebar">
+        <div class="progress-container">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                <span>Seu Progresso</span>
+                <span id="pct-text">65%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="pct-bar"></div></div>
+        </div>
+        
+        <div class="module">
+            <div class="module-title">Módulo 1: Introdução</div>
+            <div class="lesson" onclick="changeLesson('1.1')">
+                <span>1.1 Conceitos Básicos</span> <span>✅</span>
+            </div>
+            <div class="lesson" onclick="changeLesson('1.2')">
+                <span>1.2 O Mercado Atual</span> <span>✅</span>
+            </div>
+        </div>
+        
+        <div class="module">
+            <div class="module-title">Módulo 2: Estratégias</div>
+            <div class="lesson active" id="current-lesson-nav" onclick="changeLesson('2.1')">
+                <span>2.1 Ferramentas de Gestão</span> <span>🎥</span>
+            </div>
+            <div class="lesson locked" onclick="alert('Aula bloqueada! Conclua a anterior.')">
+                <span>2.2 Otimização 🔒</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <h2 id="lesson-title">2.1 - Ferramentas de Gestão e Análise</h2>
+        <div class="video-player" id="main-player">
+            <iframe id="video-iframe" src="" allowfullscreen></iframe>
+            <button id="start-btn" onclick="startVideo()">▶ INICIAR AULA</button>
+            <p style="margin-top: 15px; font-size: 0.8rem; color: #94a3b8;">Duração: 18:45</p>
+        </div>
+        
+        <div class="materials">
+            <h3 style="margin-top: 0;">📦 Materiais desta aula</h3>
+            <div id="material-list">
+                <div class="material-item">
+                    <span>📄 Guia_Estrategico_CGL.pdf</span>
+                    <button class="btn-download" onclick="downloadMaterial('')">Download</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="chat-area">
+        <div class="chat-tabs">
+            <div class="tab active" onclick="switchChat(this, 'turma')">TURMA</div>
+            <div class="tab" onclick="switchChat(this, 'professor')">PROFESSOR</div>
+        </div>
+        
+        <div class="messages-container" id="chat-box">
+            <div class="msg">
+                <small>Maria Oliveira</small>
+                Alguém sabe se o material do módulo 2 já é o final?
+            </div>
+            <div class="msg">
+                <small>Pedro Santos</small>
+                Acredito que sim, Maria! O professor mencionou na aula passada.
+            </div>
+        </div>
+
+        <div class="chat-input-wrapper">
+            <input type="text" id="user-input" placeholder="Escreva aqui..." onkeypress="handleChat(event)">
+        </div>
+    </section>
+</div>
+
+<script>
+    let currentChat = 'turma';
+    let chatMessages = {
+        turma: [
+            '<div class="msg"><small>Maria Oliveira</small>Alguém sabe se o material do módulo 2 já é o final?</div>',
+            '<div class="msg"><small>Pedro Santos</small>Acredito que sim, Maria! O professor mencionou na aula passada.</div>'
+        ],
+        professor: [
+            '<div class="msg"><small>Prof. Carlos</small>Olá João! Como posso te ajudar com a aula de hoje?</div>'
+        ]
+    };
+
+    let lessonsData = {};
+
+    // Carregar dados do data.json
+    fetch('data.json')
+        .then(response => response.json())
+        .then(data => {
+            lessonsData = data.lessons || {};
+        })
+        .catch(error => console.error('Erro ao carregar dados:', error));
+
+    function updateProgress() {
+        const completedLessons = document.querySelectorAll('.lesson:not(.locked)').length;
+        const totalLessons = document.querySelectorAll('.lesson').length;
+        const percentage = Math.round((completedLessons / totalLessons) * 100);
+        document.getElementById('pct-text').innerText = percentage + '%';
+        document.getElementById('pct-bar').style.width = percentage + '%';
+    }
+    updateProgress();
+
+    function changeLesson(id) {
+        if (!lessonsData[id]) {
+            alert('Aula não encontrada!');
+            return;
+        }
+        const lesson = lessonsData[id];
+        document.getElementById('lesson-title').innerText = id + " - " + lesson.title;
+        
+        const materialList = document.getElementById('material-list');
+        materialList.innerHTML = lesson.materials.map(material => `
+            <div class="material-item">
+                <span>${material.name}</span>
+                <button class="btn-download" onclick="downloadMaterial('${material.url}')">Download</button>
+            </div>
+        `).join('');
+        
+        const iframe = document.getElementById('video-iframe');
+        iframe.src = lesson.videoUrl || '';
+        document.getElementById('start-btn').style.display = lesson.videoUrl ? 'none' : 'block';
+        iframe.style.display = lesson.videoUrl ? 'block' : 'none';
+        
+        const lessons = document.querySelectorAll('.lesson');
+        lessons.forEach(l => l.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function startVideo() {
+        const iframe = document.getElementById('video-iframe');
+        if (iframe.src) {
+            iframe.style.display = 'block';
+            document.getElementById('start-btn').style.display = 'none';
+        } else {
+            alert('Vídeo não disponível!');
+        }
+    }
+
+    function downloadMaterial(url) {
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            alert('Material não disponível!');
+        }
+    }
+
+    function switchChat(element, type) {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        element.classList.add('active');
+        
+        currentChat = type;
+        updateChatDisplay();
+    }
+
+    function updateChatDisplay() {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML = chatMessages[currentChat].join('');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function handleChat(e) {
+        if(e.key === 'Enter' && e.target.value.trim() !== "") {
+            const userMsg = e.target.value.trim();
+            
+            const msgHTML = `<div class="msg me"><small>Você</small>${userMsg}</div>`;
+            chatMessages[currentChat].push(msgHTML);
+            
+            updateChatDisplay();
+            e.target.value = "";
+        }
+    }
+</script>
+
+</body>
+</html>
