@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGL - Painel Administrativo</title>
+    <style>
+        :root { 
+            --admin-bg: #111827; 
+            --card-bg: #1f2937; 
+            --accent: #2563eb; 
+            --success: #059669;
+            --danger: #ef4444;
+        }
+        
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--admin-bg); color: white; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Admin */
+        .sidebar { width: 260px; background: #111827; border-right: 1px solid #374151; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #374151; color: var(--accent); }
+        .nav-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #1f2937; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover { background: #1e293b; }
+        .nav-item.active { background: var(--accent); border-left: 4px solid #fff; }
+
+        /* Main Area */
+        .main { flex: 1; display: grid; grid-template-columns: 1fr 320px; overflow: hidden; }
+        .content { padding: 30px; overflow-y: auto; display: none; } /* Escondido por padrão */
+        .content.active { display: block; } /* Mostra apenas o ativo */
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #374151; }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--success); padding: 15px; border-radius: 8px; text-align: center; }
+
+        .btn-add { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-add:hover { opacity: 0.9; }
+
+        /* Listas */
+        .item-list { list-style: none; padding: 0; }
+        .item-list li { display: flex; justify-content: space-between; padding: 12px; background: #374151; margin-bottom: 8px; border-radius: 4px; align-items: center; }
+        .actions span { cursor: pointer; margin-left: 10px; opacity: 0.7; transition: 0.2s; }
+        .actions span:hover { opacity: 1; }
+
+        /* Financeiro Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #374151; }
+        th { color: #94a3b8; font-size: 0.8em; text-transform: uppercase; }
+
+        /* Chat Lateral */
+        .chat-admin { background: #1f2937; border-left: 1px solid #374151; display: flex; flex-direction: column; }
+        .chat-header { padding: 15px; background: #111827; font-weight: bold; border-bottom: 1px solid #374151; }
+        .messages { flex: 1; padding: 15px; overflow-y: auto; }
+        .msg-bubble { background: #374151; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9em; }
+        .chat-input-area { padding: 15px; border-top: 1px solid #374151; }
+        .chat-input-area input { width: 90%; padding: 10px; border-radius: 5px; border: none; background: #111827; color: white; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-header">CGL ADMIN</div>
+    <div class="nav-item active" onclick="showPage('cursos')">📚 Meus Cursos</div>
+    <div class="nav-item" onclick="showPage('modulos')">📝 Gestão de Módulos</div>
+    <div class="nav-item" onclick="showPage('alunos')">👥 Gerenciar Alunos</div>
+    <div class="nav-item" onclick="showPage('financeiro')">💰 Financeiro</div>
+    <div class="nav-item" onclick="showPage('config')">⚙️ Configurações</div>
+</aside>
+
+<div class="main">
+    <div id="cursos" class="content active">
+        <h1>Dashboard: Consultoria e Gestão Logística</h1>
+        <div class="stats-grid">
+            <div class="stat-card"><h3>150</h3><p>Alunos Ativos</p></div>
+            <div class="stat-card" style="background: #2563eb;"><h3>32</h3><p>Aulas Publicadas</p></div>
+            <div class="stat-card" style="background: #7c3aed;"><h3>R$ 12.450</h3><p>Receita Total</p></div>
+        </div>
+        <div class="card">
+            <h3>Visão Geral do Curso</h3>
+            <p>O curso CGL está com 85% de taxa de conclusão média. 12 alunos novos entraram esta semana.</p>
+            <button class="btn-add">Ver Relatório Detalhado</button>
+        </div>
+    </div>
+
+    <div id="modulos" class="content">
+        <h1>Gestão de Módulos e Aulas</h1>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Estrutura do Curso</h3>
+                <button class="btn-add" onclick="alert('Abrir modal de nova aula')">+ Adicionar Conteúdo</button>
+            </div>
+            <ul class="item-list">
+                <li><span>🎥 Aula 1.1: Fundamentos</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
+                <li><span>🎥 Aula 1.2: Cadeia de Suprimentos</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
+                <li><span>📄 Apostila_Modulo_1.pdf</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
+                <li><span>🎥 Aula 2.1: Gestão de KPIs</span> <div class="actions"><span>✏️</span><span style="color:var(--danger)">🗑️</span></div></li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Upload Rápido</h3>
+            <input type="file" style="background: #111827; padding: 10px; width: 100%; border-radius: 5px; border: 1px dashed #4b5563;">
+        </div>
+    </div>
+
+    <div id="alunos" class="content">
+        <h1>Gerenciamento de Alunos</h1>
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome do Aluno</th>
+                        <th>Progresso</th>
+                        <th>Último Acesso</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>João Silva</td>
+                        <td>65%</td>
+                        <td>Hoje, 14:20</td>
+                        <td style="color: var(--success)">Ativo</td>
+                    </tr>
+                    <tr>
+                        <td>Maria Souza</td>
+                        <td>12%</td>
+                        <td>Ontem</td>
+                        <td style="color: var(--success)">Ativo</td>
+                    </tr>
+                    <tr>
+                        <td>Carlos Lima</td>
+                        <td>100%</td>
+                        <td>2 dias atrás</td>
+                        <td style="color: #94a3b8">Concluído</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="financeiro" class="content">
+        <h1>Gestão Financeira</h1>
+        <div class="stats-grid">
+            <div class="stat-card" style="background: #1e293b; border: 1px solid var(--success);">
+                <p>Disponível para Saque</p>
+                <h2>R$ 4.200,00</h2>
+            </div>
+            <div class="stat-card" style="background: #1e293b; border: 1px solid #94a3b8;">
+                <p>Vendas no Mês</p>
+                <h2>R$ 8.150,00</h2>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Últimas Transações</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Aluno</th>
+                        <th>Valor</th>
+                        <th>Método</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>21/01/2026</td><td>Ricardo M.</td><td>R$ 497,00</td><td>PIX</td></tr>
+                    <tr><td>20/01/2026</td><td>Ana Paula</td><td>R$ 497,00</td><td>Cartão</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <section class="chat-admin">
+        <div class="chat-header">💬 Chat com Alunos</div>
+        <div class="messages" id="chatMessages">
+            <div class="msg-bubble">
+                <small style="color: var(--accent)">João Silva (Aluno):</small><br>
+                Professor, a aula 2.1 não está abrindo o PDF.
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Responder para a turma..." onkeypress="sendMessage(event)">
+        </div>
+    </section>
+</div>
+
+<script>
+    // Função para alternar entre as abas/páginas
+    function showPage(pageId) {
+        // Esconde todas as páginas
+        const pages = document.querySelectorAll('.content');
+        pages.forEach(page => page.classList.remove('active'));
+
+        // Mostra a página clicada
+        document.getElementById(pageId).classList.add('active');
+
+        // Atualiza a classe active no menu lateral
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    // Função simples de chat
+    function sendMessage(e) {
+        if (e.key === 'Enter' && e.target.value !== "") {
+            const chatBox = document.getElementById('chatMessages');
+            const newMsg = document.createElement('div');
+            newMsg.className = 'msg-bubble';
+            newMsg.style.background = '#1e3a8a'; // Cor diferente para o professor
+            newMsg.innerHTML = `<small style="color: #60a5fa">Você (Professor):</small><br>${e.target.value}`;
+            chatBox.appendChild(newMsg);
+            e.target.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+</script>
+
+</body>
+</html>
